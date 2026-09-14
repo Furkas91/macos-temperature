@@ -17,20 +17,20 @@ Small macOS menu-bar utility that shows CPU temperature on Apple Silicon.
 
 > **Note:** On some CLT-only installs, `swift build` is broken (SDK/compiler mismatch). Use `./scripts/package.sh`, which compiles with `swiftc` and a patched SDK overlay.
 
-## Build & run
+## Build & install
 
 ```bash
 chmod +x scripts/package.sh
 ./scripts/package.sh
-open dist/TemperatureBar.app
+open dist/TemperatureBar-1.0.dmg
 ```
 
-If you have a full Xcode install, this also works:
+Откроется диск с приложением: перетащи **TemperatureBar** в **Applications**, затем запусти из Launchpad / Applications.
 
-```bash
-swift build -c release
-```
+Первый запуск без подписи Apple: правый клик → **Open** → подтвердить (Gatekeeper).
+
+Если есть полный Xcode, вместо скрипта можно собрать бинарник через `swift build -c release` — для `.app` / `.dmg` всё равно удобнее `./scripts/package.sh`.
 
 ## Notes
 
-Temperature is read via private IOHID APIs (same approach as Stats / btop). Intended for personal use — not App Store distribution.
+Temperature is read via private IOHID APIs (same approach as Stats / btop). Intended for personal use — not App Store distribution. The DMG is unsigned.

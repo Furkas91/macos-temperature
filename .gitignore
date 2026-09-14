@@ -1,4 +1,5 @@
 .build/
 dist/
 *.app
+*.dmg
 .DS_Store

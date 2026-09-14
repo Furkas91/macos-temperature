@@ -70,12 +70,38 @@ swiftc -parse-as-library \
   "$SRC/TemperatureBarApp.swift" \
   -o "$OUT/$APP_NAME"
 
+VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$SRC/Info.plist" 2>/dev/null || echo "1.0")"
+DMG_NAME="${APP_NAME}-${VERSION}"
+DMG_PATH="$ROOT/dist/${DMG_NAME}.dmg"
+STAGE="$BUILD/dmg-stage"
+
 echo "Assembling ${APP_NAME}.app…"
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR"
+mkdir -p "$MACOS_DIR" "$CONTENTS/Resources"
 cp "$OUT/$APP_NAME" "$MACOS_DIR/$APP_NAME"
 cp "$SRC/Info.plist" "$CONTENTS/Info.plist"
+cp "$SRC/Resources/AppIcon.icns" "$CONTENTS/Resources/AppIcon.icns"
+printf 'APPL????' > "$CONTENTS/PkgInfo"
 chmod +x "$MACOS_DIR/$APP_NAME"
+xattr -cr "$APP_DIR" 2>/dev/null || true
 
-echo "Done: $APP_DIR"
-echo "Run with: open \"$APP_DIR\""
+echo "Creating ${DMG_NAME}.dmg…"
+rm -rf "$STAGE" "$DMG_PATH"
+mkdir -p "$STAGE"
+cp -R "$APP_DIR" "$STAGE/"
+ln -s /Applications "$STAGE/Applications"
+
+# Read-only compressed DMG with drag-to-Applications layout
+hdiutil create \
+  -volname "$APP_NAME" \
+  -srcfolder "$STAGE" \
+  -ov \
+  -format UDZO \
+  "$DMG_PATH" >/dev/null
+
+rm -rf "$STAGE"
+
+echo "Done:"
+echo "  App: $APP_DIR"
+echo "  DMG: $DMG_PATH"
+echo "Install: open \"$DMG_PATH\"  →  drag TemperatureBar into Applications"
